@@ -15,22 +15,18 @@ const createProduct = async (req, res) => {
                 msg: "product already exists"
             });
         }
-
-        // find category
-        const findCategory = await Category.findOne({name: category});
-        if(!findCategory){
+        const newProduct = new Product({
+            name, description, category, sizes, colors, user: req.userAuthId, price, totalQty, brand
+        });
+        const categoryFound = await Category.findOne({name: category});
+        if(!categoryFound){
             return res.status(404).json({
                 message: "No category found, create category first"
             })
         }
-
-        const newProduct = new Product({
-            name, description, category, sizes, colors, user: req.userAuthId, price, totalQty, brand
-        });
-        
         await Product.create(newProduct);
-        // findCategory.product.push(newProduct.id);
-        // await findCategory.save();
+        categoryFound.product.push(newProduct);
+        await categoryFound.save();
         res.status(201).json({
             msg: "product created successfully",
             data: newProduct
